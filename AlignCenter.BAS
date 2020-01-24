@@ -3,7 +3,7 @@
 ' It selects the center of the highest and lowest pins selected even if more than 2 are selected.
 
 Public Const PI = 3.14159265359
-Public Const MAXINT = 2^15 - 1
+Public Const MAXFLT = 2^31 - 1
 
 Dim axis As String
 Dim selection(100) As String
@@ -33,14 +33,14 @@ Public Function Move_Selected_Cmp (axis, value)
 End Function
 
 Sub SetCenter (axis)
-	Dim x_min, y_min, x_max, y_max As Integer
+	Dim x_min, y_min, x_max, y_max As Single
 	
 	cnt = Get_Selected_Pins
 	
-	x_min = MAXINT
-	y_min = MAXINT
-	x_max = -MAXINT
-	y_max = -MAXINT
+	x_min = MAXFLT
+	y_min = MAXFLT
+	x_max = -MAXFLT
+	y_max = -MAXFLT
 	
 	For i = 0 To cnt - 1
 		Set p = ActiveDocument.Pins(selection(i))
