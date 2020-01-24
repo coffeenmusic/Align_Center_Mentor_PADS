@@ -1,14 +1,9 @@
 ' Description
-
-' Useful code:
-' Set compU1 = ActiveDocument.Components("U1")
-' Document.LayerName(label.layer)
-' comp.Name; ","; comp.IsSMD; ","; comp.PositionX; ","; comp.PositionY;  ","; comp.CenterX;  ","; comp.CenterY; ","; comp.Orientation; ","; layer;
-' Format(radius, "0.0") 
-' Floor: Int(1.2) = 1.0
-' MsgBox(p.Name + ": " + Format(p.PositionX, "0.00") + ", " + Format(p.PositionY, "0.00"))
+' Gui with X & Y buttons that will center in either axis. This will center the selected component in between the selected pins.
+' It selects the center of the highest and lowest pins selected even if more than 2 are selected.
 
 Public Const PI = 3.14159265359
+Public Const MAXINT = 2^15 - 1
 
 Dim axis As String
 Dim selection(100) As String
@@ -38,12 +33,14 @@ Public Function Move_Selected_Cmp (axis, value)
 End Function
 
 Sub SetCenter (axis)
+	Dim x_min, y_min, x_max, y_max As Integer
+	
 	cnt = Get_Selected_Pins
 	
-	x_min = 9999999
-	y_min = 9999999	
-	x_max = -9999999
-	y_max = -9999999
+	x_min = MAXINT
+	y_min = MAXINT
+	x_max = -MAXINT
+	y_max = -MAXINT
 	
 	For i = 0 To cnt - 1
 		Set p = ActiveDocument.Pins(selection(i))
@@ -79,19 +76,23 @@ Sub SetCenter (axis)
 End Sub
 
 Sub Main
-	Begin Dialog UserDialog 200,84,"Center Component From Pins",.CallbackFunc ' %GRID:10,7,1,1
+	On Error GoTo EndScript
+	Begin Dialog UserDialog 200,84,"Center Component From Pins",.CallbackFunc
 		PushButton 40,7,50,21,"X",.btnX 'Center In X
 		PushButton 100,7,50,21,"Y",.btnY 'Center In Y
 		CancelButton 40,56,110,21
 	End Dialog
 	Dim dlg As UserDialog
 	Dialog dlg
+	
+	EndScript:
+		Exit All
 End Sub
 
 Private Function CallbackFunc(DlgItem$, Action%, SuppValue%) As Boolean
 	Select Case Action%
 		Case 1 ' Dialog box initialization
-			' DlgValue "grpAxis",0
+			' No initialization
 		Case 2 ' Value changing or button pressed
 			If (DlgItem$ <> "Cancel") Then
 				CallbackFunc = True ' Prevent button press from closing the dialog box
@@ -100,7 +101,7 @@ Private Function CallbackFunc(DlgItem$, Action%, SuppValue%) As Boolean
 				ElseIf DlgItem$ = "btnY" Then
 					SetCenter "y"
 				End If
-			 ElseIf DlgItem$ = "Cancel" Then
+			ElseIf DlgItem$ = "Cancel" Then
 			 	CallbackFunc = False ' closing the dialog box
 			End If
 		Case 3 ' TextBox or ComboBox text changed
